@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline'; img-src 'self' data: https:;" />
+<title>Aurora Mail</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+
+    <!-- ===== Sidebar ===== -->
+    <aside class="sidebar">
+      <div class="titlebar-drag"></div>
+
+      <div class="account-switcher" id="accountSwitcher">
+        <!-- account chips injected here -->
+      </div>
+
+      <button class="btn-compose" id="btnCompose">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+        Soạn thư
+      </button>
+
+      <nav class="folder-list" id="folderList">
+        <!-- folders injected here -->
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="link-btn" id="btnAddAccount">+ Thêm tài khoản email</button>
+      </div>
+    </aside>
+
+    <!-- ===== Message list ===== -->
+    <section class="message-pane">
+      <div class="pane-header">
+        <h1 id="folderTitle">Hộp thư đến</h1>
+        <div class="search-box">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <input type="text" id="searchInput" placeholder="Tìm kiếm thư" />
+        </div>
+      </div>
+      <div class="message-list" id="messageList">
+        <!-- messages injected here -->
+      </div>
+    </section>
+
+    <!-- ===== Reading pane ===== -->
+    <section class="reading-pane" id="readingPane">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-glyph">✉️</div>
+        <p>Chọn một email để đọc</p>
+      </div>
+      <div class="message-detail" id="messageDetail" hidden>
+        <div class="detail-header">
+          <h2 id="detailSubject"></h2>
+          <div class="detail-meta">
+            <div class="avatar" id="detailAvatar"></div>
+            <div>
+              <div class="detail-from" id="detailFrom"></div>
+              <div class="detail-to" id="detailTo"></div>
+            </div>
+            <div class="detail-date" id="detailDate"></div>
+          </div>
+        </div>
+        <div class="detail-body" id="detailBody"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===== Add Account Modal ===== -->
+  <div class="modal-overlay" id="accountModalOverlay" hidden>
+    <div class="modal">
+      <h2>Thêm tài khoản email</h2>
+      <p class="modal-sub">Nhập thông tin IMAP / SMTP — giống thiết lập trong Thunderbird hoặc Outlook.</p>
+
+      <div class="preset-row">
+        <button class="preset-chip" data-preset="gmail">Gmail</button>
+        <button class="preset-chip" data-preset="outlook">Outlook / Office 365</button>
+        <button class="preset-chip" data-preset="yahoo">Yahoo</button>
+        <button class="preset-chip" data-preset="icloud">iCloud</button>
+        <button class="preset-chip" data-preset="custom">Tuỳ chỉnh</button>
+      </div>
+
+      <form id="accountForm">
+        <div class="form-row">
+          <label>Tên hiển thị</label>
+          <input type="text" id="fDisplayName" placeholder="Ví dụ: Công việc" required />
+        </div>
+        <div class="form-row">
+          <label>Địa chỉ email</label>
+          <input type="email" id="fEmail" placeholder="ban@example.com" required />
+        </div>
+        <div class="form-row">
+          <label>Mật khẩu / App password</label>
+          <input type="password" id="fPassword" required />
+        </div>
+
+        <div class="form-grid">
+          <div class="form-row">
+            <label>Máy chủ IMAP</label>
+            <input type="text" id="fImapHost" placeholder="imap.example.com" required />
+          </div>
+          <div class="form-row small">
+            <label>Cổng</label>
+            <input type="number" id="fImapPort" value="993" required />
+          </div>
+          <div class="form-row small">
+            <label>SSL/TLS</label>
+            <select id="fImapSecure"><option value="true">Có</option><option value="false">Không</option></select>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-row">
+            <label>Máy chủ SMTP</label>
+            <input type="text" id="fSmtpHost" placeholder="smtp.example.com" required />
+          </div>
+          <div class="form-row small">
+            <label>Cổng</label>
+            <input type="number" id="fSmtpPort" value="587" required />
+          </div>
+          <div class="form-row small">
+            <label>SSL/TLS</label>
+            <select id="fSmtpSecure"><option value="false">STARTTLS</option><option value="true">SSL</option></select>
+          </div>
+        </div>
+
+        <p class="form-error" id="formError" hidden></p>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" id="btnCancelAccount">Huỷ</button>
+          <button type="button" class="btn-secondary" id="btnTestAccount">Kiểm tra kết nối</button>
+          <button type="submit" class="btn-primary" id="btnSaveAccount">Lưu tài khoản</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== Compose Modal ===== -->
+  <div class="modal-overlay" id="composeOverlay" hidden>
+    <div class="modal compose-modal">
+      <h2>Thư mới</h2>
+      <form id="composeForm">
+        <div class="form-row">
+          <label>Đến</label>
+          <input type="text" id="cTo" placeholder="nguoinhan@example.com" required />
+        </div>
+        <div class="form-row">
+          <label>Tiêu đề</label>
+          <input type="text" id="cSubject" placeholder="Tiêu đề email" required />
+        </div>
+        <div class="form-row">
+          <label>Nội dung</label>
+          <textarea id="cBody" rows="10" placeholder="Nội dung email..."></textarea>
+        </div>
+        <p class="form-error" id="composeError" hidden></p>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" id="btnCancelCompose">Huỷ</button>
+          <button type="submit" class="btn-primary">Gửi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
